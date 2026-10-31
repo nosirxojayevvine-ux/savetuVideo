@@ -5,7 +5,7 @@ import telebot
 from telebot import types
 import yt_dlp
 
-# --- 1. Flask veb-server (Render va Cron-job uchun 24/7 ishchi holat) ---
+# --- 1. Flask veb-server (Render uchun 24/7 ishchi holat) ---
 app = Flask(__name__)
 
 
@@ -24,16 +24,17 @@ t.daemon = True
 t.start()
 
 # --- 2. Telegram Bot va Sozlamalar ---
-TOKEN = '9228563150:AAHK4E9n5FbprJVRWoqewgp6NOQmPBtoADw'
+TOKEN = '8815596661:AAGIEtg_BA-PUmmBqd48GU8qMFB5SnvBWec'
 bot = telebot.TeleBot(TOKEN)
 
 # Sizning Admin ID raqamingiz
 ADMIN_ID = 8019481444
 
-ADS_TEXT = '\n\n🤖 **Bot:** @SavedToVideoBot'
+# Bot nomi o'zgartirildi
+ADS_TEXT = '\n\n🤖 **Bot:** @VideoSaveQualityBot'
 
 
-# Foydalanuvchini bazaga (users.txt) saqlash funksiyasi
+# Foydalanuvchini bazaga saqlash
 def save_user(user_id):
   if not os.path.exists('users.txt'):
     with open('users.txt', 'w') as f:
@@ -45,18 +46,18 @@ def save_user(user_id):
       f.write(str(user_id) + '\n')
 
 
-# Inline tugma (Guruhga qo'shish)
+# Inline tugma (Guruhga qo'shish - havolani o'z botingiz useriga moslang)
 def get_keyboard():
   keyboard = types.InlineKeyboardMarkup()
   add_btn = types.InlineKeyboardButton(
       text="➕ Guruhga qo'shish",
-      url='https://t.me/SavedToVideoBot?startgroup=true',
+      url='https://t.me/VideoSaveQualityBot?startgroup=true',
   )
   keyboard.add(add_btn)
   return keyboard
 
 
-# --- 3. Buyruqlar (Command Handlers) ---
+# --- 3. Buyruqlar ---
 
 
 @bot.message_handler(commands=['start'])
@@ -70,7 +71,6 @@ def start_message(message):
   )
 
 
-# --- STATISTIKA BUYRUG'I (/stats) ---
 @bot.message_handler(commands=['stats'])
 def stats_message(message):
   if message.from_user.id != ADMIN_ID:
@@ -91,7 +91,6 @@ def stats_message(message):
   )
 
 
-# --- XABAR TARQATISH BUYRUG'I (/send) ---
 @bot.message_handler(commands=['send', 'broadcast'])
 def broadcast_message(message):
   if message.from_user.id != ADMIN_ID:
@@ -112,7 +111,6 @@ def broadcast_message(message):
   success = 0
   failed = 0
 
-  # A) Agar Rasm bilan yuborilgan bo'lsa
   if message.caption:
     caption_text = (
         message.caption.replace('/send', '').replace('/broadcast', '').strip()
@@ -130,19 +128,10 @@ def broadcast_message(message):
         success += 1
       except Exception:
         failed += 1
-
-  # B) Agar faqat Matn yuborilgan bo'lsa
   else:
     text = message.text.replace('/send', '').replace('/broadcast', '').strip()
     if not text:
-      bot.reply_to(
-          message,
-          '⚠️ **Qanday ishlatiladi?**\n\n'
-          '1. **Faqat matn:** `/send Assalomu alaykum`\n'
-          '2. **Rasm bilan:** Rasmni tanlab, ostidagi matnga `/send Bu rasm'
-          ' izohi` deb yozasiz.',
-          parse_mode='Markdown',
-      )
+      bot.reply_to(message, '⚠️ Matn yozmadingiz.')
       return
 
     for uid in users:
@@ -154,12 +143,12 @@ def broadcast_message(message):
 
   bot.reply_to(
       message,
-      f'Xabar tarqatildi! ✅\n\nYetib bordi: {success} ta\nYetib bormadi (bloklagan):'
+      f'Xabar tarqatildi! ✅\n\nYetib bordi: {success} ta\nYetib bormadi:'
       f' {failed} ta',
   )
 
 
-# --- 4. Video Yuklovchi Handler (Doim eng pastda turadi) ---
+# --- 4. Video Yuklovchi Handler ---
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
   save_user(message.chat.id)
@@ -181,7 +170,7 @@ def handle_message(message):
       bot.send_video(
           message.chat.id,
           video,
-          caption=f'Yuklab olindi!{ADS_TEXT}',
+          caption=f'Tashlagan Havolangiz uchun @VideoSaveQualityBot nomidan RAXMAT❤️ !{ADS_TEXT}',
           parse_mode='Markdown',
           reply_markup=get_keyboard(),
       )
@@ -201,3 +190,4 @@ def handle_message(message):
 if __name__ == '__main__':
   print('Bot ishga tushdi...')
   bot.infinity_polling(timeout=10, long_polling_timeout=5)
+
