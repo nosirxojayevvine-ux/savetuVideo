@@ -24,7 +24,7 @@ t.daemon = True
 t.start()
 
 # --- 2. Telegram Bot va Sozlamalar ---
-TOKEN = '8815596661:AAGIEtg_BA-PUmmBqd48GU8qMFB5SnvBWec'
+TOKEN = '9228563150:AAHK4E9n5FbprJVRWoqewgp6NOQmPBtoADw'
 bot = telebot.TeleBot(TOKEN)
 
 # Sizning Admin ID raqamingiz
