@@ -34,9 +34,9 @@ ADMIN_ID = 8019481444
 ADS_TEXT = '\n\n🤖 **Bot:** @VideoSaveQualityBot'
 
 
-# Chatni (shaxsiy yoki guruhni) bazaga saqlash
-def save_chat(message):
-  chat_id = str(message.chat.id)
+# Chatni (shaxsiy yoki guruhni) bazaga saqlash funksiyasi
+def save_chat_id(chat_id):
+  chat_id = str(chat_id)
   if not os.path.exists('users.txt'):
     with open('users.txt', 'w') as f:
       pass
@@ -58,18 +58,27 @@ def get_keyboard():
   return keyboard
 
 
-# --- 3. Buyruqlar ---
+# --- 3. Buyruqlar va Guruhga qo'shilishni ushlash ---
 
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
-  save_chat(message)
+  save_chat_id(message.chat.id)
   bot.send_message(
       message.chat.id,
       'Xush kelibsiz! Menga Instagram, TikTok yoki YouTube\'dan havola'
       ' yuboring.',
       reply_markup=get_keyboard(),
   )
+
+
+# Bot guruhga qo'shilganda yoki chiqarib yuborilganda ishlaydi
+@bot.my_chat_member_handler()
+def bot_added_to_chat(message):
+  new_status = message.new_chat_member.status
+  if new_status in ['member', 'administrator']:
+    chat_id = message.chat.id
+    save_chat_id(chat_id)
 
 
 @bot.message_handler(commands=['stats'])
@@ -94,22 +103,18 @@ def stats_message(message):
   )
 
 
-# --- 4. Tarqatish funksiyasi (Linklar va tugmalarni saqlab qoladigan tarzda) ---
-@bot.message_handler(content_types=['text', 'photo'])
+# --- 4. Tarqatish funksiyasi (/send yoki /broadcast) ---
+@bot.message_handler(
+    content_types=['text', 'photo'],
+    func=lambda message: message.from_user.id == ADMIN_ID
+    and (
+        (message.text and message.text.startswith('/send'))
+        or (message.text and message.text.startswith('/broadcast'))
+        or (message.caption and message.caption.startswith('/send'))
+        or (message.caption and message.caption.startswith('/broadcast'))
+    ),
+)
 def broadcast_message(message):
-  if message.from_user.id != ADMIN_ID:
-    handle_video_download(message)
-    return
-
-  text_to_check = message.text or message.caption or ''
-
-  if not (
-      text_to_check.startswith('/send')
-      or text_to_check.startswith('/broadcast')
-  ):
-    handle_video_download(message)
-    return
-
   if not os.path.exists('users.txt'):
     bot.reply_to(message, 'Hozircha bazada chatlar yo\'q.')
     return
@@ -124,7 +129,7 @@ def broadcast_message(message):
   success = 0
   failed = 0
 
-  # Rasm bilan bo'lsa (@PostBot tugmalari va rasmini qo'shib yuboradi)
+  # Rasm bilan bo'lsa
   if message.photo:
     file_id = message.photo[-1].file_id
     caption_text = message.caption or ''
@@ -132,7 +137,6 @@ def broadcast_message(message):
       if caption_text.startswith(cmd):
         caption_text = caption_text.replace(cmd, '', 1).strip()
 
-    # PostBot qo'shgan tugmalarni ham (reply_markup) birga olib o'tamiz
     markup = message.reply_markup if message.reply_markup else None
 
     for cid in chats:
@@ -170,44 +174,52 @@ def broadcast_message(message):
   )
 
 
-# --- 5. Video yuklash funksiyasi ---
-def handle_video_download(message):
-  save_chat(message)
+# --- 5. Guruhlar va shaxsiy chatlar uchun oddiy xabarlar / Video yuklash ---
+@bot.message_handler(content_types=['text', 'photo'])
+def handle_all_messages(message):
+  save_chat_id(message.chat.id)
+
+  # Agar guruhda bo'lsa va oddiy matn yoki rasm bo'lsa, bot umuman aralashmaydi
+  if message.chat.type in ['group', 'supergroup']:
+    if not message.text:
+      return
+    text = message.text.strip()
+    if not (text.startswith('http://') or text.startswith('https://')):
+      return
 
   if not message.text:
     return
 
   text = message.text.strip()
 
-  if not (text.startswith('http://') or text.startswith('https://')):
-    return
+  # Havola bo'lsa video yuklaydi
+  if text.startswith('http://') or text.startswith('https://'):
+    msg = bot.reply_to(message, '⏳ Video yuklanmoqda, kuting...')
 
-  msg = bot.reply_to(message, '⏳ Video yuklanmoqda, kuting...')
+    ydl_opts = {'format': 'best', 'outtmpl': 'video.mp4', 'quiet': True}
 
-  ydl_opts = {'format': 'best', 'outtmpl': 'video.mp4', 'quiet': True}
+    try:
+      with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([text])
 
-  try:
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-      ydl.download([text])
+      with open('video.mp4', 'rb') as video:
+        bot.send_video(
+            message.chat.id,
+            video,
+            caption=f'Videoingizni yuklab berganimizdan mamnunmiz ❤️ va siga @VideoSaveQualityBot nomidan Raxmat, ketingi linklarda kutamiz.. !{ADS_TEXT}',
+            parse_mode='Markdown',
+            reply_markup=get_keyboard(),
+        )
 
-    with open('video.mp4', 'rb') as video:
-      bot.send_video(
-          message.chat.id,
-          video,
-          caption=f'Videoingizni yuklab berganimizdan mamnunmiz❤️ ,va @VideoSaveQualityBot nomidan sizga Raxmat kelasi linkni kutib qolamiz...!{ADS_TEXT}',
-          parse_mode='Markdown',
-          reply_markup=get_keyboard(),
+      if os.path.exists('video.mp4'):
+        os.remove('video.mp4')
+
+      bot.delete_message(message.chat.id, msg.message_id)
+
+    except Exception as e:
+      bot.edit_message_text(
+          f'Xatolik yuz berdi: {e}', message.chat.id, msg.message_id
       )
-
-    if os.path.exists('video.mp4'):
-      os.remove('video.mp4')
-
-    bot.delete_message(message.chat.id, msg.message_id)
-
-  except Exception as e:
-    bot.edit_message_text(
-        f'Xatolik yuz berdi: {e}', message.chat.id, msg.message_id
-    )
 
 
 # --- 6. Botni ishga tushirish ---
