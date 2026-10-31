@@ -30,7 +30,7 @@ bot = telebot.TeleBot(TOKEN)
 # Sizning Admin ID raqamingiz
 ADMIN_ID = 8019481444
 
-# Bot nomi o'zgartirildi
+# Bot imzosi
 ADS_TEXT = '\n\n🤖 **Bot:** @VideoSaveQualityBot'
 
 
@@ -46,7 +46,7 @@ def save_user(user_id):
       f.write(str(user_id) + '\n')
 
 
-# Inline tugma (Guruhga qo'shish - havolani o'z botingiz useriga moslang)
+# Inline tugma (Guruhga qo'shish)
 def get_keyboard():
   keyboard = types.InlineKeyboardMarkup()
   add_btn = types.InlineKeyboardButton(
@@ -111,10 +111,13 @@ def broadcast_message(message):
   success = 0
   failed = 0
 
+  # Rasm bilan kelgan xabarlar uchun
   if message.caption:
-    caption_text = (
-        message.caption.replace('/send', '').replace('/broadcast', '').strip()
-    )
+    caption_text = message.caption
+    for cmd in ['/send', '/broadcast']:
+      if caption_text.startswith(cmd):
+        caption_text = caption_text.replace(cmd, '', 1).strip()
+
     file_id = message.photo[-1].file_id if message.photo else None
 
     for uid in users:
@@ -129,7 +132,12 @@ def broadcast_message(message):
       except Exception:
         failed += 1
   else:
-    text = message.text.replace('/send', '').replace('/broadcast', '').strip()
+    # Faqat matnli xabarlar uchun
+    text = message.text
+    for cmd in ['/send', '/broadcast']:
+      if text.startswith(cmd):
+        text = text.replace(cmd, '', 1).strip()
+
     if not text:
       bot.reply_to(message, '⚠️ Matn yozmadingiz.')
       return
@@ -170,7 +178,7 @@ def handle_message(message):
       bot.send_video(
           message.chat.id,
           video,
-          caption=f'Tashlagan Havolangiz uchun @VideoSaveQualityBot nomidan RAXMAT❤️ !{ADS_TEXT}',
+          caption=f'Videoingizni yuklabberganimizdan mamnunmiz❤️ ,va @VideoSaveQualityBot nomidan sizga Raxmat kelasi linkni kutib qolamiz... !{ADS_TEXT}',
           parse_mode='Markdown',
           reply_markup=get_keyboard(),
       )
@@ -190,4 +198,5 @@ def handle_message(message):
 if __name__ == '__main__':
   print('Bot ishga tushdi...')
   bot.infinity_polling(timeout=10, long_polling_timeout=5)
+
 
