@@ -67,7 +67,7 @@ def start_message(message):
   bot.send_message(
       message.chat.id,
       'Xush kelibsiz! Menga Instagram, TikTok yoki YouTube\'dan havola'
-      ' yuborshingizni kutyabman.. .',
+      ' yuboring.',
       reply_markup=get_keyboard(),
   )
 
@@ -95,7 +95,14 @@ def stats_message(message):
   )
 
 
-@bot.message_handler(commands=['send', 'broadcast'])
+# --- 4. Tarqatish funksiyasi (Matn va Rasm uchun birdek ishlaydi) ---
+@bot.message_handler(
+    content_types=['text', 'photo'],
+    func=lambda m: (m.text and m.text.startswith('/send'))
+    or (m.text and m.text.startswith('/broadcast'))
+    or (m.caption and m.caption.startswith('/send'))
+    or (m.caption and m.caption.startswith('/broadcast')),
+)
 def broadcast_message(message):
   if message.from_user.id != ADMIN_ID:
     bot.reply_to(message, 'Kechirasiz, bu buyruq faqat admin uchun!')
@@ -115,29 +122,25 @@ def broadcast_message(message):
   success = 0
   failed = 0
 
-  # Rasm bilan kelgan xabarlar uchun
-  if message.caption:
-    caption_text = message.caption
+  # Agar rasm bilan yuborilgan bo'lsa
+  if message.photo:
+    file_id = message.photo[-1].file_id
+    caption_text = message.caption or ''
     for cmd in ['/send', '/broadcast']:
       if caption_text.startswith(cmd):
         caption_text = caption_text.replace(cmd, '', 1).strip()
 
-    file_id = message.photo[-1].file_id if message.photo else None
-
     for cid in chats:
       try:
-        if file_id:
-          bot.send_photo(
-              cid, file_id, caption=caption_text, parse_mode='Markdown'
-          )
-        else:
-          bot.send_message(cid, caption_text, parse_mode='Markdown')
+        bot.send_photo(
+            cid, file_id, caption=caption_text, parse_mode='Markdown'
+        )
         success += 1
       except Exception:
         failed += 1
   else:
-    # Faqat matnli xabarlar uchun
-    text = message.text
+    # Faqat matnli bo'lsa
+    text = message.text or ''
     for cmd in ['/send', '/broadcast']:
       if text.startswith(cmd):
         text = text.replace(cmd, '', 1).strip()
@@ -160,7 +163,7 @@ def broadcast_message(message):
   )
 
 
-# --- 4. Xabarlarni qabul qilish va Video yuklash ---
+# --- 5. Boshqa xabarlar va Video yuklash ---
 @bot.message_handler(content_types=['text', 'photo'])
 def handle_all_messages(message):
   save_chat(message)
@@ -170,7 +173,6 @@ def handle_all_messages(message):
 
   text = message.text.strip()
 
-  # Agar havola bo'lmasa, guruhda yoki shaxsiyda boshqa narsalarga aralashmaydi
   if not (text.startswith('http://') or text.startswith('https://')):
     return
 
@@ -186,7 +188,7 @@ def handle_all_messages(message):
       bot.send_video(
           message.chat.id,
           video,
-          caption=f'Videoingizni yuklab   berganimizdan mamnunmiz❤️ ,va @VideoSaveQualityBot nomidan sizga Raxmat kelasi linkni kutib qolamiz...!{ADS_TEXT}',
+          caption=f'Videoingizni yuklab berganimizdan mamnunmiz❤️ ,va @VideoSaveQualityBot nomidan sizga Raxmat kelasi linkni kutib qolamiz...!{ADS_TEXT}',
           parse_mode='Markdown',
           reply_markup=get_keyboard(),
       )
@@ -202,10 +204,7 @@ def handle_all_messages(message):
     )
 
 
-# --- 5. Botni ishga tushirish ---
+# --- 6. Botni ishga tushirish ---
 if __name__ == '__main__':
   print('Bot ishga tushdi...')
   bot.infinity_polling(timeout=10, long_polling_timeout=5)
-
-
-
