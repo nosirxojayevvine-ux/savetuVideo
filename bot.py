@@ -34,16 +34,17 @@ ADMIN_ID = 8019481444
 ADS_TEXT = '\n\n🤖 **Bot:** @VideoSaveQualityBot'
 
 
-# Foydalanuvchini bazaga saqlash
-def save_user(user_id):
+# Chatni (shaxsiy yoki guruhni) bazaga saqlash
+def save_chat(message):
+  chat_id = str(message.chat.id)
   if not os.path.exists('users.txt'):
     with open('users.txt', 'w') as f:
       pass
   with open('users.txt', 'r') as f:
-    users = f.read().splitlines()
-  if str(user_id) not in users:
+    chats = f.read().splitlines()
+  if chat_id not in chats:
     with open('users.txt', 'a') as f:
-      f.write(str(user_id) + '\n')
+      f.write(chat_id + '\n')
 
 
 # Inline tugma (Guruhga qo'shish)
@@ -62,11 +63,11 @@ def get_keyboard():
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
-  save_user(message.chat.id)
+  save_chat(message)
   bot.send_message(
       message.chat.id,
       'Xush kelibsiz! Menga Instagram, TikTok yoki YouTube\'dan havola'
-      ' yuboring.',
+      ' yuborshingizni kutyabman.. .',
       reply_markup=get_keyboard(),
   )
 
@@ -78,15 +79,18 @@ def stats_message(message):
     return
 
   if not os.path.exists('users.txt'):
-    bot.reply_to(message, '📊 **Statistika:**\n\nJami foydalanuvchilar: 0 ta')
+    bot.reply_to(
+        message, '📊 **Statistika:**\n\nJami chatlar (shaxsiy + guruh): 0 ta'
+    )
     return
 
   with open('users.txt', 'r') as f:
-    users = f.read().splitlines()
+    chats = f.read().splitlines()
 
   bot.reply_to(
       message,
-      f'📊 **Bot statistikasi:**\n\nJami foydalanuvchilar: {len(users)} ta',
+      f'📊 **Bot statistikasi:**\n\nJami chatlar (shaxsiy + guruh): {len(chats)}'
+      ' ta',
       parse_mode='Markdown',
   )
 
@@ -98,13 +102,13 @@ def broadcast_message(message):
     return
 
   if not os.path.exists('users.txt'):
-    bot.reply_to(message, 'Hozircha bazada foydalanuvchilar yo\'q.')
+    bot.reply_to(message, 'Hozircha bazada chatlar yo\'q.')
     return
 
   with open('users.txt', 'r') as f:
-    users = f.read().splitlines()
+    chats = f.read().splitlines()
 
-  if not users:
+  if not chats:
     bot.reply_to(message, 'Baza bo\'sh.')
     return
 
@@ -120,14 +124,14 @@ def broadcast_message(message):
 
     file_id = message.photo[-1].file_id if message.photo else None
 
-    for uid in users:
+    for cid in chats:
       try:
         if file_id:
           bot.send_photo(
-              uid, file_id, caption=caption_text, parse_mode='Markdown'
+              cid, file_id, caption=caption_text, parse_mode='Markdown'
           )
         else:
-          bot.send_message(uid, caption_text, parse_mode='Markdown')
+          bot.send_message(cid, caption_text, parse_mode='Markdown')
         success += 1
       except Exception:
         failed += 1
@@ -142,28 +146,32 @@ def broadcast_message(message):
       bot.reply_to(message, '⚠️ Matn yozmadingiz.')
       return
 
-    for uid in users:
+    for cid in chats:
       try:
-        bot.send_message(uid, text, parse_mode='Markdown')
+        bot.send_message(cid, text, parse_mode='Markdown')
         success += 1
       except Exception:
         failed += 1
 
   bot.reply_to(
       message,
-      f'Xabar tarqatildi! ✅\n\nYetib bordi: {success} ta\nYetib bormadi:'
-      f' {failed} ta',
+      f'Xabar tarqatildi! ✅\n\nYetib bordi: {success} ta chatga\nYetib'
+      f' bormadi: {failed} ta',
   )
 
 
-# --- 4. Video Yuklovchi Handler ---
-@bot.message_handler(func=lambda message: True)
-def handle_message(message):
-  save_user(message.chat.id)
-  url = message.text.strip()
+# --- 4. Xabarlarni qabul qilish va Video yuklash ---
+@bot.message_handler(content_types=['text', 'photo'])
+def handle_all_messages(message):
+  save_chat(message)
 
-  if not (url.startswith('http://') or url.startswith('https://')):
-    bot.reply_to(message, "Iltimos, to'g'ri havola yuboring.")
+  if not message.text:
+    return
+
+  text = message.text.strip()
+
+  # Agar havola bo'lmasa, guruhda yoki shaxsiyda boshqa narsalarga aralashmaydi
+  if not (text.startswith('http://') or text.startswith('https://')):
     return
 
   msg = bot.reply_to(message, '⏳ Video yuklanmoqda, kuting...')
@@ -172,13 +180,13 @@ def handle_message(message):
 
   try:
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-      ydl.download([url])
+      ydl.download([text])
 
     with open('video.mp4', 'rb') as video:
       bot.send_video(
           message.chat.id,
           video,
-          caption=f'Videoingizni yuklabberganimizdan mamnunmiz❤️ ,va @VideoSaveQualityBot nomidan sizga Raxmat kelasi linkni kutib qolamiz... !{ADS_TEXT}',
+          caption=f'Videoingizni yuklab   berganimizdan mamnunmiz❤️ ,va @VideoSaveQualityBot nomidan sizga Raxmat kelasi linkni kutib qolamiz...!{ADS_TEXT}',
           parse_mode='Markdown',
           reply_markup=get_keyboard(),
       )
@@ -198,5 +206,6 @@ def handle_message(message):
 if __name__ == '__main__':
   print('Bot ishga tushdi...')
   bot.infinity_polling(timeout=10, long_polling_timeout=5)
+
 
 
