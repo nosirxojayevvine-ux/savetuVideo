@@ -91,21 +91,23 @@ def stats_message(message):
       message,
       f'📊 **Bot statistikasi:**\n\nJami chatlar (shaxsiy + guruh): {len(chats)}'
       ' ta',
-      parse_mode='Markdown',
   )
 
 
-# --- 4. Tarqatish funksiyasi (Matn va Rasm uchun birdek ishlaydi) ---
-@bot.message_handler(
-    content_types=['text', 'photo'],
-    func=lambda m: (m.text and m.text.startswith('/send'))
-    or (m.text and m.text.startswith('/broadcast'))
-    or (m.caption and m.caption.startswith('/send'))
-    or (m.caption and m.caption.startswith('/broadcast')),
-)
+# --- 4. Tarqatish funksiyasi (Linklar va tugmalarni saqlab qoladigan tarzda) ---
+@bot.message_handler(content_types=['text', 'photo'])
 def broadcast_message(message):
   if message.from_user.id != ADMIN_ID:
-    bot.reply_to(message, 'Kechirasiz, bu buyruq faqat admin uchun!')
+    handle_video_download(message)
+    return
+
+  text_to_check = message.text or message.caption or ''
+
+  if not (
+      text_to_check.startswith('/send')
+      or text_to_check.startswith('/broadcast')
+  ):
+    handle_video_download(message)
     return
 
   if not os.path.exists('users.txt'):
@@ -122,7 +124,7 @@ def broadcast_message(message):
   success = 0
   failed = 0
 
-  # Agar rasm bilan yuborilgan bo'lsa
+  # Rasm bilan bo'lsa (@PostBot tugmalari va rasmini qo'shib yuboradi)
   if message.photo:
     file_id = message.photo[-1].file_id
     caption_text = message.caption or ''
@@ -130,10 +132,13 @@ def broadcast_message(message):
       if caption_text.startswith(cmd):
         caption_text = caption_text.replace(cmd, '', 1).strip()
 
+    # PostBot qo'shgan tugmalarni ham (reply_markup) birga olib o'tamiz
+    markup = message.reply_markup if message.reply_markup else None
+
     for cid in chats:
       try:
         bot.send_photo(
-            cid, file_id, caption=caption_text, parse_mode='Markdown'
+            cid, file_id, caption=caption_text, reply_markup=markup
         )
         success += 1
       except Exception:
@@ -149,9 +154,11 @@ def broadcast_message(message):
       bot.reply_to(message, '⚠️ Matn yozmadingiz.')
       return
 
+    markup = message.reply_markup if message.reply_markup else None
+
     for cid in chats:
       try:
-        bot.send_message(cid, text, parse_mode='Markdown')
+        bot.send_message(cid, text, reply_markup=markup)
         success += 1
       except Exception:
         failed += 1
@@ -163,9 +170,8 @@ def broadcast_message(message):
   )
 
 
-# --- 5. Boshqa xabarlar va Video yuklash ---
-@bot.message_handler(content_types=['text', 'photo'])
-def handle_all_messages(message):
+# --- 5. Video yuklash funksiyasi ---
+def handle_video_download(message):
   save_chat(message)
 
   if not message.text:
