@@ -52,12 +52,12 @@ TEXTS = {
             '🎵 Music\n\n'
             '• *Videoni yuklash uchun video yoki rasmni havolasini menga'
             " jo'ating*\n\n"
-            '(Bot guruhlarda ham ishlaydi, guruhda ham ishlatmoqchi bo\'lsangiz'
+            '(Bot guruhlarda kirdi chiqdini ochirishga hamda reklamalardan tozalaydi  shunchaki admin va ochirish uchun tugma yoniq bolishi kerak , guruhda ham ishlatmoqchi bo\'lsangiz'
             ' tugmani bosing 👇)'
         ),
-        'btn_group': "➕ Guruhga qo'shish",
+        'btn_group': "➕ Guruhga qoshing va Kirdi chiqdini ochiraman✅ ",
         'downloading': '⏳ Video yuklanmoqda, kuting...',
-        'success': 'Yuklab olindi!',
+        'success': 'Yuklab olindi Qo'shimchasiga Men guruhlarda kirdi chiqdini hamda reklamalardan TOZALAYMAN🫷 shunchaki admin va delete huquqi berilishi kerak!',
     },
     'uz_kr': {
         'welcome': (
@@ -79,9 +79,9 @@ TEXTS = {
             '(Бот гуруҳларда ҳам ишлайди, гуруҳда ҳам ишлатмоқчи бўлсангиз тугмани'
             ' босинг 👇)'
         ),
-        'btn_group': '➕ Гуруҳга қўшиш',
+        'btn_group': '➕ Гуруҳга қўшимг ва кирди чикдидан халос болинг',
         'downloading': '⏳ Видео юкланмоқда, кутинг...',
-        'success': 'Юклаб олинди!',
+        'success': 'Юклаб олинди!📥  Мени гурухга кошинг ва кирди чикдини очираман',
     },
     'ru': {
         'welcome': (
@@ -102,9 +102,9 @@ TEXTS = {
             '(Бот также работает в группах, если хотите использовать его в'
             ' группе, нажмите кнопку 👇)'
         ),
-        'btn_group': '➕ Добавить в группу',
+        'btn_group': '➕ Добавить в  группу Я выключу и тот, что входит и выходит',
         'downloading': '⏳ Загрузка видео, подождите...',
-        'success': 'Загружено!',
+        'success': 'Загружено (Дабавить в группу Я выключу тот, что заходил и выходил!',
     },
     'en': {
         'welcome': (
@@ -125,9 +125,9 @@ TEXTS = {
             '(The bot also works in groups, if you want to use it in a group,'
             ' click the button 👇)'
         ),
-        'btn_group': '➕ Add to group',
+        'btn_group': '➕ Add to group I'll turn off the one that came in and out',
         'downloading': '⏳ Downloading video, please wait...',
-        'success': 'Downloaded!',
+        'success': 'Downloaded Thanks for  @VideoSaveQualityBot If you put me in the group, I'll turn off the one!',
     },
 }
 
