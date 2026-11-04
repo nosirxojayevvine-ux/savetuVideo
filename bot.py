@@ -51,14 +51,13 @@ TEXTS = {
             '🧵 Threads\n'
             '🎵 Music\n\n'
             '• *Videoni yuklash uchun video yoki rasmni havolasini menga'
-            " jo'sting*\n\n"
+            " jo'ating*\n\n"
             '(Bot guruhlarda ham ishlaydi, guruhda ham ishlatmoqchi bo\'lsangiz'
             ' tugmani bosing 👇)'
         ),
         'btn_group': "➕ Guruhga qo'shish",
-        'lang_changed': "Til O'zbekcha (Lotin) ga o'zgartirildi ✅",
         'downloading': '⏳ Video yuklanmoqda, kuting...',
-        'success': 'Yuborgan havolangiz Yuklab olindi📥  @VideoSaveQualityBot nomidan sizga raxmat✊ kelasi linkda kutib qolamiz... !',
+        'success': 'Yuklab olindi!',
     },
     'uz_kr': {
         'welcome': (
@@ -81,9 +80,8 @@ TEXTS = {
             ' босинг 👇)'
         ),
         'btn_group': '➕ Гуруҳга қўшиш',
-        'lang_changed': 'Тил Ўзбекча (Крил) га ўзгартирилди ✅',
         'downloading': '⏳ Видео юкланмоқда, кутинг...',
-        'success': 'Юборган  хаволангиз юуклаб олинди📥 @VideoSaveQualityBot номидан сизга рахмат ва келаси линкда кутиб коламиз.. !',
+        'success': 'Юклаб олинди!',
     },
     'ru': {
         'welcome': (
@@ -105,7 +103,6 @@ TEXTS = {
             ' группе, нажмите кнопку 👇)'
         ),
         'btn_group': '➕ Добавить в группу',
-        'lang_changed': 'Язык изменен на Русский ✅',
         'downloading': '⏳ Загрузка видео, подождите...',
         'success': 'Загружено!',
     },
@@ -129,38 +126,26 @@ TEXTS = {
             ' click the button 👇)'
         ),
         'btn_group': '➕ Add to group',
-        'lang_changed': 'Language changed to English ✅',
         'downloading': '⏳ Downloading video, please wait...',
         'success': 'Downloaded!',
     },
 }
 
 
-# Foydalanuvchi tilini saqlash va o'qish funksiyalari
-def set_user_lang(user_id, lang):
-  user_id = str(user_id)
-  langs = {}
-  if os.path.exists('languages.txt'):
-    with open('languages.txt', 'r') as f:
-      for line in f:
-        parts = line.strip().split(':')
-        if len(parts) == 2:
-          langs[parts[0]] = parts[1]
-  langs[user_id] = lang
-  with open('languages.txt', 'w') as f:
-    for uid, l in langs.items():
-      f.write(f'{uid}:{l}\n')
-
-
-def get_user_lang(user_id):
-  user_id = str(user_id)
-  if os.path.exists('languages.txt'):
-    with open('languages.txt', 'r') as f:
-      for line in f:
-        parts = line.strip().split(':')
-        if len(parts) == 2 and parts[0] == user_id:
-          return parts[1]
-  return 'uz'  # Standart til - O'zbekcha
+# Foydalanuvchi tilini aniqlash
+def get_user_language(user):
+  lang_code = user.language_code
+  if not lang_code:
+    return 'uz'
+  lang_code = lang_code.lower()
+  if 'uz' in lang_code:
+    return 'uz'
+  elif 'ru' in lang_code:
+    return 'ru'
+  elif 'en' in lang_code:
+    return 'en'
+  else:
+    return 'uz'
 
 
 # Chatni bazaga saqlash
@@ -176,21 +161,7 @@ def save_chat_id(chat_id):
       f.write(chat_id + '\n')
 
 
-# Til tanlash tugmalari
-def get_language_keyboard():
-  keyboard = types.InlineKeyboardMarkup(row_width=2)
-  keyboard.add(
-      types.InlineKeyboardButton("🇺🇿 O'zbekcha", callback_data='lang_uz'),
-      types.InlineKeyboardButton(
-          '🇺🇿 Ўзбекча (Крил)', callback_data='lang_uz_kr'
-      ),
-      types.InlineKeyboardButton('🇷🇺 Русский', callback_data='lang_ru'),
-      types.InlineKeyboardButton('🇬🇧 English', callback_data='lang_en'),
-  )
-  return keyboard
-
-
-# Guruhga qo'shish tugmasi (tilga moslashgan)
+# Guruhga qo'shish tugmasi
 def get_group_keyboard(lang='uz'):
   keyboard = types.InlineKeyboardMarkup()
   btn_text = TEXTS.get(lang, TEXTS['uz'])['btn_group']
@@ -201,36 +172,18 @@ def get_group_keyboard(lang='uz'):
   return keyboard
 
 
-# --- 4. Buyruqlar va Til tanlash ---
+# --- 4. Start buyrug'i ---
 @bot.message_handler(commands=['start'])
 def start_message(message):
   save_chat_id(message.chat.id)
+  lang = get_user_language(message.from_user)
+  t = TEXTS.get(lang, TEXTS['uz'])
+
   bot.send_message(
       message.chat.id,
-      '🇺🇿 Iltimos, tilni tanlang:\n🇷🇺 Пожалуйста, выберите язык:\n🇬🇧 Please'
-      ' select a language:',
-      reply_markup=get_language_keyboard(),
-  )
-
-
-@bot.callback_query_handler(func=lambda call: call.data.startswith('lang_'))
-def language_callback(call):
-  user_id = call.from_user.id
-  if call.data == 'lang_uz_kr':
-    lang_code = 'uz_kr'
-  else:
-    lang_code = call.data.replace('lang_', '')
-
-  set_user_lang(user_id, lang_code)
-
-  t = TEXTS.get(lang_code, TEXTS['uz'])
-  bot.answer_callback_query(call.id, t['lang_changed'])
-  bot.edit_message_text(
       t['welcome'],
-      chat_id=call.message.chat.id,
-      message_id=call.message.message_id,
       parse_mode='Markdown',
-      reply_markup=get_group_keyboard(lang_code),
+      reply_markup=get_group_keyboard(lang),
   )
 
 
@@ -264,7 +217,86 @@ def stats_message(message):
   )
 
 
-# --- 5. Tarqatish funksiyasi (/send yoki /broadcast) ---
+# --- 5. Guruhda Kirdi-Chiqdi va @PostBot xabarlarini tozalash ---
+@bot.message_handler(
+    content_types=[
+        'new_chat_members',
+        'left_chat_member',
+        'text',
+        'photo',
+        'video',
+        'document',
+    ]
+)
+def group_cleaner_and_downloader(message):
+  save_chat_id(message.chat.id)
+
+  # 1. Kirdi-chiqdi xabarlarini o'chirish (guruhlarda)
+  if message.chat.type in ['group', 'supergroup']:
+    if message.new_chat_members or message.left_chat_member:
+      try:
+        bot.delete_message(message.chat.id, message.message_id)
+      except Exception:
+        pass
+      return
+
+    # 2. @PostBot orqali yuborilgan xabarlarni tekshirish
+    # (Agar xabar via_bot orqali kelgan bo'lsa va u @PostBot bo'lsa)
+    if message.via_bot:
+      # Agar yuboruvchi ADMIN bo'lmasa, uni o'chirib tashlaymiz
+      if message.from_user.id != ADMIN_ID:
+        try:
+          bot.delete_message(message.chat.id, message.message_id)
+        except Exception:
+          pass
+        return
+
+    # Guruhdagi oddiy matnlar/rasmlarga aralashmaymiz (faqat havolalardan tashqari)
+    if not message.text:
+      return
+    text = message.text.strip()
+    if not (text.startswith('http://') or text.startswith('https://')):
+      return
+
+  if not message.text:
+    return
+
+  text = message.text.strip()
+
+  # 3. Havola bo'lsa video yuklash
+  if text.startswith('http://') or text.startswith('https://'):
+    lang = get_user_language(message.from_user)
+    t = TEXTS.get(lang, TEXTS['uz'])
+
+    msg = bot.reply_to(message, t['downloading'])
+
+    ydl_opts = {'format': 'best', 'outtmpl': 'video.mp4', 'quiet': True}
+
+    try:
+      with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([text])
+
+      with open('video.mp4', 'rb') as video:
+        bot.send_video(
+            message.chat.id,
+            video,
+            caption=f"{t['success']}{ADS_TEXT}",
+            parse_mode='Markdown',
+            reply_markup=get_group_keyboard(lang),
+        )
+
+      if os.path.exists('video.mp4'):
+        os.remove('video.mp4')
+
+      bot.delete_message(message.chat.id, msg.message_id)
+
+    except Exception as e:
+      bot.edit_message_text(
+          f'Xatolik yuz berdi: {e}', message.chat.id, msg.message_id
+      )
+
+
+# --- 6. Tarqatish funksiyasi (/send yoki /broadcast) ---
 @bot.message_handler(
     content_types=['text', 'photo'],
     func=lambda message: message.from_user.id == ADMIN_ID
@@ -331,55 +363,6 @@ def broadcast_message(message):
       f'Xabar tarqatildi! ✅\n\nYetib bordi: {success} ta chatga\nYetib'
       f' bormadi: {failed} ta',
   )
-
-
-# --- 6. Video yuklash funksiyasi ---
-@bot.message_handler(content_types=['text', 'photo'])
-def handle_all_messages(message):
-  save_chat_id(message.chat.id)
-
-  if message.chat.type in ['group', 'supergroup']:
-    if not message.text:
-      return
-    text = message.text.strip()
-    if not (text.startswith('http://') or text.startswith('https://')):
-      return
-
-  if not message.text:
-    return
-
-  text = message.text.strip()
-
-  if text.startswith('http://') or text.startswith('https://'):
-    lang = get_user_lang(message.from_user.id)
-    t = TEXTS.get(lang, TEXTS['uz'])
-
-    msg = bot.reply_to(message, t['downloading'])
-
-    ydl_opts = {'format': 'best', 'outtmpl': 'video.mp4', 'quiet': True}
-
-    try:
-      with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([text])
-
-      with open('video.mp4', 'rb') as video:
-        bot.send_video(
-            message.chat.id,
-            video,
-            caption=f"{t['success']}{ADS_TEXT}",
-            parse_mode='Markdown',
-            reply_markup=get_group_keyboard(lang),
-        )
-
-      if os.path.exists('video.mp4'):
-        os.remove('video.mp4')
-
-      bot.delete_message(message.chat.id, msg.message_id)
-
-    except Exception as e:
-      bot.edit_message_text(
-          f'Xatolik yuz berdi: {e}', message.chat.id, msg.message_id
-      )
 
 
 # --- 7. Botni ishga tushirish ---
