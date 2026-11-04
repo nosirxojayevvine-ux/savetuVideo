@@ -33,8 +33,137 @@ ADMIN_ID = 8019481444
 # Bot imzosi
 ADS_TEXT = '\n\n🤖 **Bot:** @VideoSaveQualityBot'
 
+# --- 3. 4 Tildagi Matnlar Lug'ati ---
+TEXTS = {
+    'uz': {
+        'welcome': (
+            '👋 **Salom**\n\n'
+            '📥 **Men sizga quyidagi platformalardan video va rasmlarni'
+            ' yuklashda yordam beraman:**\n\n'
+            '🔴 YouTube\n'
+            '📸 Instagram\n'
+            '🎵 TikTok\n'
+            '📌 Pinterest\n'
+            '👻 Snapchat\n'
+            '❤️ Likee\n'
+            '💙 VK\n'
+            '🔵 Facebook\n'
+            '🧵 Threads\n'
+            '🎵 Music\n\n'
+            '• *Videoni yuklash uchun video yoki rasmni havolasini menga'
+            " jo'sting*\n\n"
+            '(Bot guruhlarda ham ishlaydi, guruhda ham ishlatmoqchi bo\'lsangiz'
+            ' tugmani bosing 👇)'
+        ),
+        'btn_group': "➕ Guruhga qo'shish",
+        'lang_changed': "Til O'zbekcha (Lotin) ga o'zgartirildi ✅",
+        'downloading': '⏳ Video yuklanmoqda, kuting...',
+        'success': 'Yuborgan havolangiz Yuklab olindi📥  @VideoSaveQualityBot nomidan sizga raxmat✊ kelasi linkda kutib qolamiz... !',
+    },
+    'uz_kr': {
+        'welcome': (
+            '👋 **Салом**\n\n'
+            '📥 **Мен сизга қуйидаги платформалардан видео ва расмларни юклашда'
+            ' ёрдам бераман:**\n\n'
+            '🔴 YouTube\n'
+            '📸 Instagram\n'
+            '🎵 TikTok\n'
+            '📌 Pinterest\n'
+            '👻 Snapchat\n'
+            '❤️ Likee\n'
+            '💙 VK\n'
+            '🔵 Facebook\n'
+            '🧵 Threads\n'
+            '🎵 Music\n\n'
+            '• *Видеони юклаш учун видео ёки расмни ҳаволасини менга'
+            " жўртинг*\n\n"
+            '(Бот гуруҳларда ҳам ишлайди, гуруҳда ҳам ишлатмоқчи бўлсангиз тугмани'
+            ' босинг 👇)'
+        ),
+        'btn_group': '➕ Гуруҳга қўшиш',
+        'lang_changed': 'Тил Ўзбекча (Крил) га ўзгартирилди ✅',
+        'downloading': '⏳ Видео юкланмоқда, кутинг...',
+        'success': 'Юборган  хаволангиз юуклаб олинди📥 @VideoSaveQualityBot номидан сизга рахмат ва келаси линкда кутиб коламиз.. !',
+    },
+    'ru': {
+        'welcome': (
+            '👋 **Привет**\n\n'
+            '📥 **Я помогу вам скачать видео и фотографии со следующих'
+            ' платформ:**\n\n'
+            '🔴 YouTube\n'
+            '📸 Instagram\n'
+            '🎵 TikTok\n'
+            '📌 Pinterest\n'
+            '👻 Snapchat\n'
+            '❤️ Likee\n'
+            '💙 VK\n'
+            '🔵 Facebook\n'
+            '🧵 Threads\n'
+            '🎵 Music\n\n'
+            '• *Отправьте мне ссылку на видео или фото для скачивания*\n\n'
+            '(Бот также работает в группах, если хотите использовать его в'
+            ' группе, нажмите кнопку 👇)'
+        ),
+        'btn_group': '➕ Добавить в группу',
+        'lang_changed': 'Язык изменен на Русский ✅',
+        'downloading': '⏳ Загрузка видео, подождите...',
+        'success': 'Загружено!',
+    },
+    'en': {
+        'welcome': (
+            '👋 **Hello**\n\n'
+            '📥 **I can help you download videos and photos from the following'
+            ' platforms:**\n\n'
+            '🔴 YouTube\n'
+            '📸 Instagram\n'
+            '🎵 TikTok\n'
+            '📌 Pinterest\n'
+            '👻 Snapchat\n'
+            '❤️ Likee\n'
+            '💙 VK\n'
+            '🔵 Facebook\n'
+            '🧵 Threads\n'
+            '🎵 Music\n\n'
+            '• *Send me the link of the video or photo to download*\n\n'
+            '(The bot also works in groups, if you want to use it in a group,'
+            ' click the button 👇)'
+        ),
+        'btn_group': '➕ Add to group',
+        'lang_changed': 'Language changed to English ✅',
+        'downloading': '⏳ Downloading video, please wait...',
+        'success': 'Downloaded!',
+    },
+}
 
-# Chatni (shaxsiy yoki guruhni) bazaga saqlash funksiyasi
+
+# Foydalanuvchi tilini saqlash va o'qish funksiyalari
+def set_user_lang(user_id, lang):
+  user_id = str(user_id)
+  langs = {}
+  if os.path.exists('languages.txt'):
+    with open('languages.txt', 'r') as f:
+      for line in f:
+        parts = line.strip().split(':')
+        if len(parts) == 2:
+          langs[parts[0]] = parts[1]
+  langs[user_id] = lang
+  with open('languages.txt', 'w') as f:
+    for uid, l in langs.items():
+      f.write(f'{uid}:{l}\n')
+
+
+def get_user_lang(user_id):
+  user_id = str(user_id)
+  if os.path.exists('languages.txt'):
+    with open('languages.txt', 'r') as f:
+      for line in f:
+        parts = line.strip().split(':')
+        if len(parts) == 2 and parts[0] == user_id:
+          return parts[1]
+  return 'uz'  # Standart til - O'zbekcha
+
+
+# Chatni bazaga saqlash
 def save_chat_id(chat_id):
   chat_id = str(chat_id)
   if not os.path.exists('users.txt'):
@@ -47,38 +176,70 @@ def save_chat_id(chat_id):
       f.write(chat_id + '\n')
 
 
-# Inline tugma (Guruhga qo'shish)
-def get_keyboard():
+# Til tanlash tugmalari
+def get_language_keyboard():
+  keyboard = types.InlineKeyboardMarkup(row_width=2)
+  keyboard.add(
+      types.InlineKeyboardButton("🇺🇿 O'zbekcha", callback_data='lang_uz'),
+      types.InlineKeyboardButton(
+          '🇺🇿 Ўзбекча (Крил)', callback_data='lang_uz_kr'
+      ),
+      types.InlineKeyboardButton('🇷🇺 Русский', callback_data='lang_ru'),
+      types.InlineKeyboardButton('🇬🇧 English', callback_data='lang_en'),
+  )
+  return keyboard
+
+
+# Guruhga qo'shish tugmasi (tilga moslashgan)
+def get_group_keyboard(lang='uz'):
   keyboard = types.InlineKeyboardMarkup()
+  btn_text = TEXTS.get(lang, TEXTS['uz'])['btn_group']
   add_btn = types.InlineKeyboardButton(
-      text="➕ Guruhga qo'shish",
-      url='https://t.me/VideoSaveQualityBot?startgroup=true',
+      text=btn_text, url='https://t.me/VideoSaveQualityBot?startgroup=true'
   )
   keyboard.add(add_btn)
   return keyboard
 
 
-# --- 3. Buyruqlar va Guruhga qo'shilishni ushlash ---
-
-
+# --- 4. Buyruqlar va Til tanlash ---
 @bot.message_handler(commands=['start'])
 def start_message(message):
   save_chat_id(message.chat.id)
   bot.send_message(
       message.chat.id,
-      'Xush kelibsiz! Menga Instagram, TikTok yoki YouTube\'dan havola'
-      ' yuboring.',
-      reply_markup=get_keyboard(),
+      '🇺🇿 Iltimos, tilni tanlang:\n🇷🇺 Пожалуйста, выберите язык:\n🇬🇧 Please'
+      ' select a language:',
+      reply_markup=get_language_keyboard(),
   )
 
 
-# Bot guruhga qo'shilganda yoki chiqarib yuborilganda ishlaydi
+@bot.callback_query_handler(func=lambda call: call.data.startswith('lang_'))
+def language_callback(call):
+  user_id = call.from_user.id
+  if call.data == 'lang_uz_kr':
+    lang_code = 'uz_kr'
+  else:
+    lang_code = call.data.replace('lang_', '')
+
+  set_user_lang(user_id, lang_code)
+
+  t = TEXTS.get(lang_code, TEXTS['uz'])
+  bot.answer_callback_query(call.id, t['lang_changed'])
+  bot.edit_message_text(
+      t['welcome'],
+      chat_id=call.message.chat.id,
+      message_id=call.message.message_id,
+      parse_mode='Markdown',
+      reply_markup=get_group_keyboard(lang_code),
+  )
+
+
+# Bot guruhga qo'shilganda
 @bot.my_chat_member_handler()
 def bot_added_to_chat(message):
   new_status = message.new_chat_member.status
   if new_status in ['member', 'administrator']:
-    chat_id = message.chat.id
-    save_chat_id(chat_id)
+    save_chat_id(message.chat.id)
 
 
 @bot.message_handler(commands=['stats'])
@@ -103,7 +264,7 @@ def stats_message(message):
   )
 
 
-# --- 4. Tarqatish funksiyasi (/send yoki /broadcast) ---
+# --- 5. Tarqatish funksiyasi (/send yoki /broadcast) ---
 @bot.message_handler(
     content_types=['text', 'photo'],
     func=lambda message: message.from_user.id == ADMIN_ID
@@ -129,7 +290,6 @@ def broadcast_message(message):
   success = 0
   failed = 0
 
-  # Rasm bilan bo'lsa
   if message.photo:
     file_id = message.photo[-1].file_id
     caption_text = message.caption or ''
@@ -148,7 +308,6 @@ def broadcast_message(message):
       except Exception:
         failed += 1
   else:
-    # Faqat matnli bo'lsa
     text = message.text or ''
     for cmd in ['/send', '/broadcast']:
       if text.startswith(cmd):
@@ -174,12 +333,11 @@ def broadcast_message(message):
   )
 
 
-# --- 5. Guruhlar va shaxsiy chatlar uchun oddiy xabarlar / Video yuklash ---
+# --- 6. Video yuklash funksiyasi ---
 @bot.message_handler(content_types=['text', 'photo'])
 def handle_all_messages(message):
   save_chat_id(message.chat.id)
 
-  # Agar guruhda bo'lsa va oddiy matn yoki rasm bo'lsa, bot umuman aralashmaydi
   if message.chat.type in ['group', 'supergroup']:
     if not message.text:
       return
@@ -192,9 +350,11 @@ def handle_all_messages(message):
 
   text = message.text.strip()
 
-  # Havola bo'lsa video yuklaydi
   if text.startswith('http://') or text.startswith('https://'):
-    msg = bot.reply_to(message, '⏳ Video yuklanmoqda, kuting...')
+    lang = get_user_lang(message.from_user.id)
+    t = TEXTS.get(lang, TEXTS['uz'])
+
+    msg = bot.reply_to(message, t['downloading'])
 
     ydl_opts = {'format': 'best', 'outtmpl': 'video.mp4', 'quiet': True}
 
@@ -206,9 +366,9 @@ def handle_all_messages(message):
         bot.send_video(
             message.chat.id,
             video,
-            caption=f'Videoingizni yuklab berganimizdan mamnunmiz ❤️ va siga @VideoSaveQualityBot nomidan Raxmat, ketingi linklarda kutamiz.. !{ADS_TEXT}',
+            caption=f"{t['success']}{ADS_TEXT}",
             parse_mode='Markdown',
-            reply_markup=get_keyboard(),
+            reply_markup=get_group_keyboard(lang),
         )
 
       if os.path.exists('video.mp4'):
@@ -222,7 +382,7 @@ def handle_all_messages(message):
       )
 
 
-# --- 6. Botni ishga tushirish ---
+# --- 7. Botni ishga tushirish ---
 if __name__ == '__main__':
   print('Bot ishga tushdi...')
   bot.infinity_polling(timeout=10, long_polling_timeout=5)
