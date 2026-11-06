@@ -30,16 +30,14 @@ bot = telebot.TeleBot(TOKEN)
 # Sizning Admin ID raqamingiz
 ADMIN_ID = 8019481444
 
-# Bot imzosi
-ADS_TEXT = '\n\n🤖 **Bot:** @VideoSaveQualityBot'
-
-# --- 3. 4 Tildagi Matnlar Lug'ati ---
+# --- 3. 4 Tildagi Matnlar va Reklama (Imzo) ---
 TEXTS = {
     'uz': {
         'welcome': (
-            '👋 **Salom**\n\n'
-            '📥 **Men sizga quyidagi platformalardan video va rasmlarni'
-            ' yuklashda yordam beraman:**\n\n'
+            '👋 **Salom! Xush kelibsiz!**\n\n'
+            '🤖 **Bu bot nimalar qila oladi?**\n'
+            '📥 Sizga quyidagi platformalardan video va rasmlarni yuqori sifatda'
+            ' yuklab beradi:\n\n'
             '🔴 YouTube\n'
             '📸 Instagram\n'
             '🎵 TikTok\n'
@@ -50,20 +48,33 @@ TEXTS = {
             '🔵 Facebook\n'
             '🧵 Threads\n'
             '🎵 Music\n\n'
-            '• *Videoni yuklash uchun video yoki rasmni havolasini menga'
-            " jo'ating*\n\n"
-            '(Bot guruhlarda kirdi chiqdini ochirishga hamda reklamalardan tozalaydi  shunchaki admin va ochirish uchun tugma yoniq bolishi kerak , guruhda ham ishlatmoqchi bo\'lsangiz'
+            '🛡 **Qo‘shimcha imkoniyatlar:**\n'
+            '• Guruhdagi reklama va kirdi-chiqdi xabarlarini avtomatik'
+            ' o‘chiradi!\n\n'
+            '• *Videoni yuklab olish uchun istalgan platforma havolasini menga'
+            " jo'nating*\n\n"
+            '(Bot guruhlarda ham ishlaydi, guruhga qo‘shish uchun pastdagi'
             ' tugmani bosing 👇)'
         ),
-        'btn_group': "➕ Guruhga qoshing va Kirdi chiqdini ochiraman✅ ",
+        'btn_group': "➕ Guruhga qo'shish",
         'downloading': '⏳ Video yuklanmoqda, kuting...',
-        'success': 'Yuklab olindi Qo'shimchasiga Men guruhlarda kirdi chiqdini hamda reklamalardan TOZALAYMAN🫷 shunchaki admin va delete huquqi berilishi kerak!',
+        'success': '✅ Muvaffaqiyatli yuklab olindi!',
+        'ads': (
+            '\n\n📥 **Yuklab olindi!**\n🤖 **Bot:** @VideoSaveQualityBot\n🛡'
+            ' *Bu bot guruhdagi reklama hamda kirdi-chiqdi xabarlarini avtomatik'
+            ' o‘chiradi!*'
+        ),
+        'wrong_link': (
+            '⚠️ **Iltimos, to\'g\'ri havola yuboring!**\nSiz yuborgan matn'
+            ' havola emas yoki qo\'llab-quvvatlanmaydigan manzil.'
+        ),
     },
     'uz_kr': {
         'welcome': (
-            '👋 **Салом**\n\n'
-            '📥 **Мен сизга қуйидаги платформалардан видео ва расмларни юклашда'
-            ' ёрдам бераман:**\n\n'
+            '👋 **Салом! Хуш келибсиз!**\n\n'
+            '🤖 **Бу бот нималар қила олади?**\n'
+            '📥 Сизга қуйидаги платформалардан видео ва расмларни юқори сифатда'
+            ' юклаб беради:\n\n'
             '🔴 YouTube\n'
             '📸 Instagram\n'
             '🎵 TikTok\n'
@@ -74,20 +85,33 @@ TEXTS = {
             '🔵 Facebook\n'
             '🧵 Threads\n'
             '🎵 Music\n\n'
-            '• *Видеони юклаш учун видео ёки расмни ҳаволасини менга'
-            " жўртинг*\n\n"
-            '(Бот гуруҳларда ҳам ишлайди, гуруҳда ҳам ишлатмоқчи бўлсангиз тугмани'
+            '🛡 **Қўшимча имкониятлар:**\n'
+            '• Гуруҳдаги реклама ва кири-чиқди хабарларини автоматик'
+            ' ўчиради!\n\n'
+            '• *Видеони юклаб олиш учун исталган платформа ҳаволасини менга'
+            " жўнатинг*\n\n"
+            '(Бот гуруҳларда ҳам ишлайди, гуруҳга қўшиш учун пастдаги тугмани'
             ' босинг 👇)'
         ),
-        'btn_group': '➕ Гуруҳга қўшимг ва кирди чикдидан халос болинг',
+        'btn_group': '➕ Гуруҳга қўшиш',
         'downloading': '⏳ Видео юкланмоқда, кутинг...',
-        'success': 'Юклаб олинди!📥  Мени гурухга кошинг ва кирди чикдини очираман',
+        'success': '✅ Муваффақиятли юклаб олинди!',
+        'ads': (
+            '\n\n📥 **Юклаб олинди!**\n🤖 **Бот:** @VideoSaveQualityBot\n🛡'
+            ' *Бу бот гуруҳдаги реклама ҳамда кири-чиқди хабарларини автоматик'
+            ' ўчиради!*'
+        ),
+        'wrong_link': (
+            '⚠️ **Илтимос, тўғри ҳавола юборинг!**\nСиз юборган матн ҳавола эмас'
+            ' ёки қўллаб-қувватланмайдиган манзил.'
+        ),
     },
     'ru': {
         'welcome': (
-            '👋 **Привет**\n\n'
-            '📥 **Я помогу вам скачать видео и фотографии со следующих'
-            ' платформ:**\n\n'
+            '👋 **Привет! Добро пожаловать!**\n\n'
+            '🤖 **Что умеет этот бот?**\n'
+            '📥 Помогает скачивать видео и фото в высоком качестве с следующих'
+            ' платформ:\n\n'
             '🔴 YouTube\n'
             '📸 Instagram\n'
             '🎵 TikTok\n'
@@ -98,19 +122,32 @@ TEXTS = {
             '🔵 Facebook\n'
             '🧵 Threads\n'
             '🎵 Music\n\n'
+            '🛡 **Дополнительные возможности:**\n'
+            '• Автоматически удаляет рекламу и сообщения о входе/выходе в'
+            ' группах!\n\n'
             '• *Отправьте мне ссылку на видео или фото для скачивания*\n\n'
-            '(Бот также работает в группах, если хотите использовать его в'
-            ' группе, нажмите кнопку 👇)'
+            '(Бот также работает в группах, нажмите кнопку ниже, чтобы добавить'
+            ' в группу 👇)'
         ),
-        'btn_group': '➕ Добавить в  группу Я выключу и тот, что входит и выходит',
+        'btn_group': '➕ Добавить в группу',
         'downloading': '⏳ Загрузка видео, подождите...',
-        'success': 'Загружено (Дабавить в группу Я выключу тот, что заходил и выходил!',
+        'success': '✅ Успешно загружено!',
+        'ads': (
+            '\n\n📥 **Загружено!**\n🤖 **Bot:** @VideoSaveQualityBot\n🛡 *Этот'
+            ' бот автоматически удаляет рекламу и сообщения о входе/выходе в'
+            ' группах!*'
+        ),
+        'wrong_link': (
+            '⚠️ **Пожалуйста, отправьте правильную ссылку!**\nОтправленный вами'
+            ' текст не является ссылкой или поддерживаемым адресом.'
+        ),
     },
     'en': {
         'welcome': (
-            '👋 **Hello**\n\n'
-            '📥 **I can help you download videos and photos from the following'
-            ' platforms:**\n\n'
+            '👋 **Hello! Welcome!**\n\n'
+            '🤖 **What can this bot do?**\n'
+            '📥 Helps you download videos and photos in high quality from the'
+            ' following platforms:\n\n'
             '🔴 YouTube\n'
             '📸 Instagram\n'
             '🎵 TikTok\n'
@@ -121,13 +158,24 @@ TEXTS = {
             '🔵 Facebook\n'
             '🧵 Threads\n'
             '🎵 Music\n\n'
-            '• *Send me the link of the video or photo to download*\n\n'
-            '(The bot also works in groups, if you want to use it in a group,'
-            ' click the button 👇)'
+            '🛡 **Additional features:**\n'
+            '• Automatically deletes ads and join/leave messages in groups!\n\n'
+            '• *Send me the link of any platform to download*\n\n'
+            '(The bot also works in groups, click the button below to add it to'
+            ' your group 👇)'
         ),
-        'btn_group': '➕ Add to group I'll turn off the one that came in and out',
+        'btn_group': '➕ Add to group',
         'downloading': '⏳ Downloading video, please wait...',
-        'success': 'Downloaded Thanks for  @VideoSaveQualityBot If you put me in the group, I'll turn off the one!',
+        'success': '✅ Successfully downloaded!',
+        'ads': (
+            '\n\n📥 **Downloaded!**\n🤖 **Bot:** @VideoSaveQualityBot\n🛡 *This'
+            ' bot automatically deletes ads and join/leave messages in'
+            ' groups!*'
+        ),
+        'wrong_link': (
+            '⚠️ **Please send a valid link!**\nThe text you sent is not a link'
+            ' or a supported address.'
+        ),
     },
 }
 
@@ -241,9 +289,7 @@ def group_cleaner_and_downloader(message):
       return
 
     # 2. @PostBot orqali yuborilgan xabarlarni tekshirish
-    # (Agar xabar via_bot orqali kelgan bo'lsa va u @PostBot bo'lsa)
     if message.via_bot:
-      # Agar yuboruvchi ADMIN bo'lmasa, uni o'chirib tashlaymiz
       if message.from_user.id != ADMIN_ID:
         try:
           bot.delete_message(message.chat.id, message.message_id)
@@ -251,10 +297,10 @@ def group_cleaner_and_downloader(message):
           pass
         return
 
-    # Guruhdagi oddiy matnlar/rasmlarga aralashmaymiz (faqat havolalardan tashqari)
     if not message.text:
       return
     text = message.text.strip()
+    # Guruhda havoladan boshqa oddiy matn yozilsa, bot aralashmaydi (o'chirmaydi)
     if not (text.startswith('http://') or text.startswith('https://')):
       return
 
@@ -262,38 +308,41 @@ def group_cleaner_and_downloader(message):
     return
 
   text = message.text.strip()
+  lang = get_user_language(message.from_user)
+  t = TEXTS.get(lang, TEXTS['uz'])
 
-  # 3. Havola bo'lsa video yuklash
-  if text.startswith('http://') or text.startswith('https://'):
-    lang = get_user_language(message.from_user)
-    t = TEXTS.get(lang, TEXTS['uz'])
+  # 3. Agar yuborilgan xabar havola bo'lmasa (oddiy matn yoki xato so'z bo'lsa)
+  if not text.startswith('http://') and not text.startswith('https://'):
+    bot.reply_to(message, t['wrong_link'], parse_mode='Markdown')
+    return
 
-    msg = bot.reply_to(message, t['downloading'])
+  # 4. Havola bo'lsa video yuklash
+  msg = bot.reply_to(message, t['downloading'])
 
-    ydl_opts = {'format': 'best', 'outtmpl': 'video.mp4', 'quiet': True}
+  ydl_opts = {'format': 'best', 'outtmpl': 'video.mp4', 'quiet': True}
 
-    try:
-      with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([text])
+  try:
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+      ydl.download([text])
 
-      with open('video.mp4', 'rb') as video:
-        bot.send_video(
-            message.chat.id,
-            video,
-            caption=f"{t['success']}{ADS_TEXT}",
-            parse_mode='Markdown',
-            reply_markup=get_group_keyboard(lang),
-        )
-
-      if os.path.exists('video.mp4'):
-        os.remove('video.mp4')
-
-      bot.delete_message(message.chat.id, msg.message_id)
-
-    except Exception as e:
-      bot.edit_message_text(
-          f'Xatolik yuz berdi: {e}', message.chat.id, msg.message_id
+    with open('video.mp4', 'rb') as video:
+      bot.send_video(
+          message.chat.id,
+          video,
+          caption=f"{t['success']}{t['ads']}",
+          parse_mode='Markdown',
+          reply_markup=get_group_keyboard(lang),
       )
+
+    if os.path.exists('video.mp4'):
+      os.remove('video.mp4')
+
+    bot.delete_message(message.chat.id, msg.message_id)
+
+  except Exception as e:
+    bot.edit_message_text(
+        f'Xatolik yuz berdi: {e}', message.chat.id, msg.message_id
+    )
 
 
 # --- 6. Tarqatish funksiyasi (/send yoki /broadcast) ---
